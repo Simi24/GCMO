@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+
+    <title>Modifica Playlist</title>
+  </head>
+  <body onload="stampaPlaylist(); completaForm()">
+    <!--Navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">GCMO</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="miePlaylist.html">Mie playlist</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="areaPersonale.html">Area Personale</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="playlistCondivise.html">Playlist condivise</a>
+              </li>
+          </div>
+        </div>
+    </nav>
+     
+    <!--Playlist su cui stiamo lavorando-->
+    <div class="container mt-3">
+      <p class="text-center fs-1 fw-bold" id="nome">La tua playlist</p>
+  </div>
+  <div class="container mt-3">
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>Cover</th>
+                  <th>Canzone</th>
+                  <th>Album</th>
+                  <th>Artista</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody id="stampa"></tbody>
+      </table>
+  </div>
+
+  <!--SearchBar per le canzoni-->
+  <div class="container mt-3">
+    <p class="text-center fs-1 fw-bold">Aggiungi le canzoni</p>
+    <p class="text-center fs-5 fw-bold">(Clicca sulla canzone per aggiungerla alla playlist)</p>
+</div>
+<div class="container mt-3">
+    <div class="mb-3">
+            <label for="cercaCanzone" class="form-label">Cerca canzoni</label>
+            <input type="text" class="form-control" id="cerca" onkeyup="searchBar()">
+        </div>
+</div>
+
+<!--Risultato ricerca canzoni-->
+<div class="container mt-3">
+    <p class="text-center fs-1 fw-bold">Canzoni</p>
+</div>
+<div class="container mt-3">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Cover</th>
+                <th>Canzone</th>
+                <th>Album</th>
+                <th>Artista</th>
+                <th>Id</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="risultati"></tbody>
+    </table>
+</div>
+
+<!--Form per modificare la descrizione-->
+<div class="container mt-3">
+  <p class="text-center fs-1 fw-bold">Descrizione</p>
+</div>
+<div class="container mt-3">
+  <form>
+      <div class="mb-3">
+          <label for="nomePlaylist" class="form-label"></label>
+          <input type="text" class="form-control" id="nomePlaylist">
+      </div>
+      <div class="input-group mb-3">
+          <span for="descrizione" class="input-group-text">Descrizione Testuale</span>
+          <textarea class="form-control" aria-label="With textarea" id="descrizione"></textarea>
+      </div>
+      <div class="mb-3">
+          <label for="tag" class="form-label">Tags</label>
+          <input type="text" class="form-control" id="tag">
+      </div>
+      
+      <button type="submit" class="btn btn-primary d-grid gap-2 col-6 mx-auto" onclick="salvaPlaylist(); location.href='miePlaylist.html' ">SALVA</button>
+  </form>
+</div>
+
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    -->
+    <script src="js.js"></script>
+    <script>
+      var url_string = window.location.href.toString();
+      
+      var url = new URL(url_string)
+      var nomePlaylist = url.searchParams.get("nomePlaylist")
+      var utente = JSON.parse(getUtenteAttivo())
+      var playlist = getPlaylist(utente.playlists, nomePlaylist)
+      console.log(playlist)
+      
+      nome.innerHTML += ": "+ nomePlaylist+"<button class="+"'btn btn-danger btn-xs'"+" id="+ "cancellaPlaylist" +" onclick="+"'eliminaPlaylist(); location.href= \"miePlaylist.html\"'"+">CANCELLA</button>"
+
+      function stampaPlaylist(){
+                for(var i =0; i < playlist.canzoni.length; i++){
+                    var request = sGetTrack(playlist.canzoni[i])
+                    request.then(json =>{
+                        stampa.innerHTML += "<tr><td><img src='" + json.album.images[2].url + "'></td><td>" + json.name + "</td><td>" + json.album.name + "</td><td>" + json.artists[0].name + "</td><td><button class="+"'btn btn-danger btn-xs'"+" onclick="+"elimina(\"" +  json.id + "\")"+">RIMUOVI</button></td></tr>"
+                    })
+                }
+      }
+
+      function elimina(id){
+
+        var canzoni = playlist.canzoni
+        const index = canzoni.indexOf(id);
+        console.log(canzoni)
+        console.log(id)
+        console.log(index)
+        if (index > -1) {
+        canzoni.splice(index, 1); // 2nd parameter means remove one item only
+          window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+          updateUser()
+          location.reload()
+          
+        }
+
+      }
+
+      function search(query) {
+                return spotifySearchTrack(query)
+            }
+
+            
+            function searchBar() {
+                var tbody = document.getElementById('risultati')
+                tbody.innerHTML = ""
+                var query = document.getElementById('cerca').value
+                if (query.length > 3) {
+                    search(query).then(json=>{
+                        json.tracks.items.forEach(track=>{
+                            tbody.innerHTML += "<tr onclick='aggiungi(\""+ track.id +"\")'><td><img src='" + track.album.images[2].url + "'></td><td>" + track.name + "</td><td>" + track.album.name + "</td><td>" + track.artists[0].name + "</td><td>" + track.id + "</td></tr>"
+
+                        }
+                        )
+                    }
+                    )
+                }
+            }
+
+            //funzione che mi serve per aggiungere una canzone alla playlist
+            function aggiungi(id) {
+                
+
+                var richiesta = sGetTrack(id)
+
+                if(!findCanzone(this.playlist, id)){
+                    console.log(findCanzone(this.playlist, id))
+                    window.alert("canzone aggiunta")
+                    
+                    playlist.canzoni.push(id)
+                    
+                    window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+                    updateUser()
+                    
+                    richiesta.then(json=>{
+                        
+                        stampa.innerHTML += "<tr><td><img src='" + json.album.images[2].url + "'></td><td>" + json.name + "</td><td>" + json.album.name + "</td><td>" + json.artists[0].name + "</td><td><button class="+"'btn btn-danger btn-xs'"+" onclick="+"elimina(\"" +  json.id + "\")"+">CANCELLA</button></td></tr>"
+                    }
+                
+                    )
+
+                } else {
+                    window.alert("canzone gia' aggiunta")
+                }
+                
+                
+                //se l'id non e' gia' contenuto nella playlist lo aggiungo
+
+
+            }
+
+      function completaForm(){
+        document.getElementById("nomePlaylist").value  = playlist.nome
+        document.getElementById("descrizione").value = playlist.descrizione
+        document.getElementById("tag").value = playlist.tags
+      }
+
+      function salvaPlaylist(){
+        event.preventDefault()
+        
+        playlist.nome = document.getElementById("nomePlaylist").value
+        playlist.descrizione = document.getElementById("descrizione").value
+        playlist.tags = document.getElementById("tag").value
+
+      
+        
+        window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+        updateUser()
+      }
+
+      function eliminaPlaylist(){
+        
+        const index = utente.playlists.indexOf(playlist)
+        console.log(index)
+        if (index > -1) {
+        utente.playlists.splice(index, 1); // 2nd parameter means remove one item only
+          window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+          updateUser()
+          window.alert("Playlist elminata!")
+          
+        }
+      }
+    </script>
+  </body>
+</html>
