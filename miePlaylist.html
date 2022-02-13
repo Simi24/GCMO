@@ -7,34 +7,41 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="style.css">
     <title>Le mie playlist</title>
   </head>
-  <body onload="stampaPlaylist()">
+  <body onload="stampaPlaylist();">
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">GCMO</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="miePlaylist.html">Mie playlist</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="areaPersonale.html">Area Personale</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="playlistCondivise.html">Playlist condivise</a>
-              </li>
-          </div>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">GCMO</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="miePlaylist.html">Mie playlist</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="areaPersonale.html">Area Personale</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="playlistCondivise.html">Playlist condivise</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="creaPlaylist.html">Crea playlist</a>
+            </li>
         </div>
-    </nav>
+      </div>
+  </nav>
+
+    <div class="container-fluid titolo" >
+      <p class="text-center fs-1 fw-bold" id="nome">Le playlist di: </p>
+    </div>
 
     <div class="container mt-3" >
-      <p class="text-center fs-1 fw-bold" id="nome">Le playlist di: </p>
+      <p class="text-center fs-3 fw-bold">Le playlist private: </p>
     </div>
 
     <div class="container mt-3">
@@ -45,6 +52,8 @@
                   <th>Descrizione</th>
                   <th>Tags</th>
                   <th>Numero Canzoni</th>
+                  <th>Durata in minuti</th>
+                  <th></th>
                   <th></th>
               </tr>
           </thead>
@@ -52,7 +61,49 @@
       </table>
   </div>
 
+  <div class="container mt-3" >
+    <p class="text-center fs-3 fw-bold">Le playlist pubbliche: </p>
+  </div>
+
   <div class="container mt-3">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Descrizione</th>
+                <th>Tags</th>
+                <th>Numero Canzoni</th>
+                <th>Durata in minuti</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="playlistsPubbliche"></tbody>
+    </table>
+</div>
+
+<div class="container mt-3" >
+  <p class="text-center fs-3 fw-bold">Le playlist importate: </p>
+</div>
+
+<div class="container mt-3">
+  <table class="table">
+      <thead>
+          <tr>
+              <th>Nome</th>
+              <th>Descrizione</th>
+              <th>Tags</th>
+              <th>Numero Canzoni</th>
+              <th>Durata in minuti</th>
+              <th>Utente</th>
+              <th></th>
+              <th></th>
+          </tr>
+      </thead>
+      <tbody id="playlistImportate"></tbody>
+  </table>
+</div>
+
+<div class="container mt-3">
     <button type="submit" class="btn btn-primary d-grid gap-2 col-6 mx-auto" onclick="location.href = 'creaPlaylist.html';">CREA NUOVA PLAYLIST</button>
 </div>
 
@@ -72,11 +123,41 @@
     <script>
       utente = JSON.parse(getUtenteAttivo())
 
+      condivise = window.localStorage.getItem('playlistCondivise')
+
+          if(condivise == null){
+            condivise = []
+          }else{
+            condivise = JSON.parse(condivise)
+          }
+      
+        if(utente.playlistsImportate.length > 0){
+          stampaPlaylistImportate()
+        }
+
       function stampaPlaylist(){
         event.preventDefault()
         nome.innerHTML += ""+ utente.nome +""
         for(var i = 0; i<utente.playlists.length; i++){
-          playlists.innerHTML += "<tr onmouseover='headline("+ i +")' onmouseout='togli("+ i +")' id='"+ i +"'><td>" + utente.playlists[i].nome + "</td><td>" + utente.playlists[i].descrizione + "</td><td>" + utente.playlists[i].tags + "</td><td>" + utente.playlists[i].canzoni.length + "</td><td><button class="+"'btn btn-primary btn-xs'"+" onclick="+"redirezione(\"" +  utente.playlists[i].nome + "\")"+">Modifica</button></td></tr>"
+          console.log(utente.playlists[i].nome)
+          durata = Math.round((utente.playlists[i].durata) * 100) / 100
+          if(utente.playlists[i].condivisa == "false"){
+            
+            playlists.innerHTML += "<tr class="+"evid"+"><td>" + utente.playlists[i].nome + "</td><td>" + utente.playlists[i].descrizione + "</td><td>" + utente.playlists[i].tags + "</td><td>" + utente.playlists[i].canzoni.length + "</td><td>" + durata + "</td><td><button class="+"'btn btn-primary btn-xs'"+" onclick='"+"redirezione(\"" +  utente.playlists[i].nome + "\")"+"'>MODIFICA</button></td><td><button class="+"'btn btn-success btn-xs'"+" onclick='"+"condividi(\"" +  utente.playlists[i].nome + "1"+"\")"+"'>CONDIVIDI</button></tr>"
+          } else {
+            playlistsPubbliche.innerHTML += "<tr class="+"evid"+"><td>" + utente.playlists[i].nome + "</td><td>" + utente.playlists[i].descrizione + "</td><td>" + utente.playlists[i].tags + "</td><td>" + utente.playlists[i].canzoni.length + "</td><td>" + durata + "</td><td><button class="+"'btn btn-danger btn-xs'"+" onclick='"+"privatizza(\"" +  utente.playlists[i].nome + "1"+"\")"+"'>RENDI PRIVATA</button></tr>"
+          }
+          
+        }
+      }
+
+      function stampaPlaylistImportate(){
+        
+        
+        for(var i = 0; i<utente.playlistsImportate.length; i++){
+          if(true){
+            playlistImportate.innerHTML += "<tr class="+"evid"+"><td>" + utente.playlistsImportate[i].nome + "</td><td>" + utente.playlistsImportate[i].descrizione + "</td><td>" + utente.playlistsImportate[i].tags + "</td><td>" + utente.playlistsImportate[i].canzoni.length + "</td><td>" + utente.playlistsImportate[i].durata + "</td><td>" + utente.playlistsImportate[i].nomeUtente + "</td><td><button class="+"'btn btn-primary btn-xs'"+" onclick='"+"redirezioneImportate(\"" +  utente.playlistsImportate[i].nome + "," + utente.playlistsImportate[i].nomeUtente + "\")"+"'>VISUALIZZA</button></td><td><button class="+"'btn btn-danger btn-xs'"+" onclick='"+"eliminaImportata(\"" +  utente.playlistsImportate[i].nome + "," + utente.playlistsImportate[i].nomeUtente + "\")"+"'>ELIMINA</button></td></tr>"
+          }
         }
       }
 
@@ -94,8 +175,79 @@
         var data = new URLSearchParams();
         data.append("nomePlaylist", nomePlaylist);
 
-        var url = "/home/simi/AWC_progetto/modificaPlaylist.html?" + data.toString();
+        var url = "modificaPlaylist.html?" + data.toString();
         location.href = url;
+      }
+
+      //TODO: onclick cambiare pagina per visualizzare la playlist
+      function redirezioneImportate(text){
+        var array = text.split(",")
+        nomePlaylist = array[0]
+        nomeUtente = array[1]
+
+        var data = new URLSearchParams();
+        data.append("nomePlaylist", nomePlaylist);
+        data.append("nomeUtente", nomeUtente)
+
+        var url = "visualizzaPlaylist.html?" + data.toString();
+        location.href = url;
+      }
+
+      function condividi(nomePlaylist){
+        event.preventDefault()
+
+        
+
+        console.log(nomePlaylist)
+        var newStr = nomePlaylist.substring(0, nomePlaylist.length - 1);
+        playlist = getPlaylist(utente.playlists, newStr)
+        console.log(playlist)
+        playlist.condivisa = 'true'
+        window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+        updateUser();
+        console.log(playlist)
+
+        condivise.push(playlist);
+        window.localStorage.setItem('playlistCondivise', JSON.stringify(condivise))
+        location.reload();
+      }
+
+      //rende privata una playlist
+      function privatizza(nomePlaylist){
+        var newStr = nomePlaylist.substring(0, nomePlaylist.length - 1);
+        playlistUtente = getPlaylist(utente.playlists, newStr)
+        
+        playlistUtente.condivisa = 'false'
+        window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+        updateUser();
+
+
+        index = getIndicePlaylistCondivisa(utente.email, newStr)
+        if (index > -1) {
+        condivise.splice(index, 1); // 2nd parameter means remove one item only
+          window.localStorage.setItem('playlistCondivise', JSON.stringify(condivise))
+          location.reload()
+          
+        }
+      }
+      
+      //eliminare una playlist che e' importata
+      function eliminaImportata(text){
+        var array = text.split(",")
+        nomePlaylist = array[0]
+        nomeUtente = array[1]
+        utenteAttivo = JSON.parse(getUtenteAttivo())
+        
+        console.log(utenteAttivo.playlistImportate)
+
+        indice = getIndicePlaylistImportata(nomeUtente, nomePlaylist)
+        console.log(indice)
+        if(indice > -1){
+          utente.playlistsImportate.splice(indice, 1)
+          window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+          updateUser();
+          location.reload();
+        }
       }
       
     </script>

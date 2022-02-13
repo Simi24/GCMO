@@ -1,8 +1,10 @@
-const client_id = "0fa2e58146a94e1ea6d372c510b88081"
-const client_secret = "7e2723d53e88421b9c80c384b38c7170"
-var url = "https://accounts.spotify.com/api/token"
+function getAPI_token(){
+    const client_id = "0fa2e58146a94e1ea6d372c510b88081"
+    const client_secret = "7e2723d53e88421b9c80c384b38c7170"
+    var url = "https://accounts.spotify.com/api/token"
 
-var access_token = window.localStorage.getItem('access_token')
+    var access_token = window.localStorage.getItem('access_token')
+    var tokenExpires = window.localStorage.getItem('tokenExpires')
 
 fetch(url, {
     method: "POST",
@@ -14,11 +16,29 @@ btoa(`${client_id}:${client_secret}`),
     body: new URLSearchParams({ grant_type: "client_credentials" }),
 })
 .then((response) => response.json())
-.then(tokenResponse =>
+.then(tokenResponse =>{
     //salvo il token di accesso nel local storage
-    window.localStorage.setItem('access_token', tokenResponse.access_token),
+    window.localStorage.setItem('access_token', tokenResponse.access_token)
+    window.localStorage.setItem('tokenExpires', tokenResponse.expires_in)
     //console.log(tokenResponse.access_token),
+}
+    
 )
+    
+}
+
+var access_token = window.localStorage.getItem('access_token')
+console.log(access_token)
+
+if(access_token == ''){
+    getAPI_token()
+}
+
+var tokenExpires = window.localStorage.getItem('tokenExpires')
+
+setInterval(getAPI_token,  3600000)
+
+
 
 //TODO: controllare quando il token scade e crarne uno nuovo
 
@@ -62,6 +82,66 @@ function sGetTrack(parameters = ''){
         } 
     )
 }
+
+function sGetGeneres(){
+    indirizzo = "https://api.spotify.com/v1/recommendations/available-genre-seeds"
+
+    return fetch(indirizzo, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + window.localStorage.getItem('access_token'),
+
+        },
+    })
+    .then((risposta) => {
+        if(risposta.ok) {
+            return risposta.json()
+        } else {
+            return risposta.json().then(json => alert(json.status_message))
+        }
+        } 
+    )
+}
+
+function sSearchArtists(parameters = ''){
+    indirizzo = "https://api.spotify.com/v1/search?q=" + parameters + "&type=artist&limit=10"
+    return fetch(indirizzo, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + window.localStorage.getItem('access_token'),
+
+        },
+    })
+    .then((risposta) => {
+        if(risposta.ok) {
+            return risposta.json()
+        } else {
+            return risposta.json().then(json => alert(json.status_message))
+        }
+        } 
+    )
+}
+
+function sGetArtists(parameters = ''){
+    indirizzo = "https://api.spotify.com/v1/artists/" + parameters 
+
+    return fetch(indirizzo, {
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + window.localStorage.getItem('access_token'),
+
+        },
+    })
+    .then((risposta) => {
+        if(risposta.ok) {
+            return risposta.json()
+        } else {
+            return risposta.json().then(json => alert(json.status_message))
+        }
+        } 
+    )
+}
+
 
 function findUser(users,user){
     //DOCUMENTAZIONE: 
@@ -107,6 +187,51 @@ function findCanzone(playlist, id){
     return false
 }
 
+//Trova un tag tra i tag di una playlist, vero o falso
+function findTag(tags, tag){
+    return tags.some(t => t == tag)
+}
+
+//Trova se un artista e' gia' presente
+function findArtista(artisti, artista){
+    return artisti.some(a => a == artista)
+}
+
+//Trova se un genere e' gia' presente
+function findGenere(generi, genere){
+    return generi.some(g => g == genere)
+}
+
+//Trova se una playlist che voglio importare l'ho gia' importata
+function findPlaylistImportata(playlistsImportate, nomeUtente, nomePlaylist){
+    console.log(playlistsImportate)
+    console.log(nomeUtente)
+    console.log(nomePlaylist)
+    for(var i=0; i<playlistsImportate.length; i++){
+        if(playlistsImportate[i].nomeUtente == nomeUtente && playlistsImportate[i].nome == nomePlaylist){
+            return true
+        }
+      }
+    return false
+    
+
+}
+
+//Trova indice di una playlist condivisa
+function findIndiceCondivisa(playlistsCondivise, nomePlaylist, nomeUtente){
+    console.log(playlistsCondivise)
+    console.log(nomePlaylist)
+    console.log(nomeUtente)
+    for(var i=0; i<playlistsCondivise.length; i++){
+        console.log(playlistsCondivise[i].nomeUtente == nomeUtente)
+        console.log(playlistsCondivise[i].nome == nomePlaylist)
+        if(playlistsCondivise[i].nomeUtente == nomeUtente && playlistsCondivise[i].nome == nomePlaylist){
+            return i
+        }
+    }
+    return -1
+}
+
 //Controlla se data una mail ed una password se l'utente e' registrato
 function utenteRegistrato(users, mail, password){
 
@@ -130,6 +255,15 @@ function indiceUtenteRegistrato(users, mail, password){
 
 function getUtenteAttivo(){
     return window.localStorage.getItem('utenteAttivo')
+}
+
+function getIndiceUtenteAttivo(users, mail){
+    for(var i=0; i<users.length; i++){
+        if(users[i].email == mail){
+            return i
+        }
+    }
+    return -1
 }
 
 //restituisce la playlist che mi serve
@@ -183,8 +317,6 @@ function formRegistrazione(){
     var email = document.getElementById('email').value
     var password = document.getElementById('password').value
     var conferma = document.getElementById('controlloPassword').value
-    var genere = document.getElementById('nome').value
-    var artista = document.getElementById('nome').value
     var email_reg_exp = /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-]{2,})+.)+([a-zA-Z0-9]{2,})+$/;
 
     if ((nome == "") || (nome == "undefined")) {
@@ -200,15 +332,69 @@ function formRegistrazione(){
         document.modulo.conferma.value = "";
         document.modulo.conferma.focus();
         return false;
-    } else if((genere == "") || (genere == "undefined")){
-        alert("Il campo Genere è obbligatorio.");
-        document.modulo.genere.focus();
+    } else {
+        return true
+    }
+}
+
+//controllo form modifica dati personali
+function modificaDati(){
+    var nome = document.getElementById('nome').value
+    var password = document.getElementById('password').value
+    var conferma = document.getElementById('controlloPassword').value
+   
+
+    if ((nome == "") || (nome == "undefined")) {
+        alert("Il campo Nome è obbligatorio.");
+        document.modulo.nome.focus();
         return false;
-    } else if((artista == "") || (artista == "undefined")){
-        alert("Il campo Genere è obbligatorio.");
-        document.modulo.genere.focus();
+    } else if (password != conferma) {
+        alert("La password confermata è diversa da quella scelta, controllare.");
+        document.modulo.conferma.value = "";
+        document.modulo.conferma.focus();
         return false;
     } else {
         return true
     }
+}
+
+//ritorna la playlist su cui stiamo lavorando tra le playlist condivise, data mail e nome playlist
+function getIndicePlaylistCondivisa(nomeUtente, nomePlaylist){
+    var pc = JSON.parse(window.localStorage.getItem('playlistCondivise'))
+    console.log(nomeUtente)
+    console.log(nomePlaylist)
+    for(var i=0; i<pc.length; i++){
+        console.log(pc[i])
+        console.log(i)
+        if(pc[i].nomeUtente == nomeUtente && pc[i].nome == nomePlaylist){
+            return i
+
+        }
+    }
+    return false;
+}
+
+function getPlaylistCondivisa(nomeUtente, nomePlaylist){
+    var pc = JSON.parse(window.localStorage.getItem('playlistCondivise'))
+    console.log(nomeUtente)
+    console.log(nomePlaylist)
+    for(var i=0; i<pc.length; i++){
+        if(pc[i].nomeUtente == nomeUtente && pc[i].nome == nomePlaylist){
+            return pc[i]
+
+        }
+    }
+    return false;
+}
+
+function getIndicePlaylistImportata(nomeUtente, nomePlaylist){
+    var utente = JSON.parse(window.localStorage.getItem('utenteAttivo'))
+    console.log(utente.playlistsImportate)
+
+    for(var i=0; i<Object.keys(utente.playlistsImportate).length; i++){
+        if(utente.playlistsImportate[i].nomeUtente == nomeUtente && utente.playlistsImportate[i].nome == nomePlaylist){
+            return i
+        }
+    }
+    return false
 }

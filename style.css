@@ -1,0 +1,34 @@
+.tags {
+   margin: 5px; 
+}
+
+#tagResult {
+    margin: 0px;
+}
+
+.titolo {
+  border-bottom: solid 2px lightgrey;
+}
+
+.evid:hover
+{
+   background-color:lightgray
+}
+
+tr
+{
+  background-color:white
+}
+
+.btn{
+    border-radius: 50px;
+    
+}
+
+.destra{
+  float: right;
+}
+
+.datiPersonali{
+  text-align: end;
+}

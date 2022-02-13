@@ -7,34 +7,37 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="style.css">
     <title>Modifica Playlist</title>
   </head>
-  <body onload="stampaPlaylist(); completaForm()">
+  <body onload="stampaPlaylist(); completaForm(); stampaTag();">
     <!--Navbar-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">GCMO</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="miePlaylist.html">Mie playlist</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="areaPersonale.html">Area Personale</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link active" href="playlistCondivise.html">Playlist condivise</a>
-              </li>
-          </div>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">GCMO</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="miePlaylist.html">Mie playlist</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="areaPersonale.html">Area Personale</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="playlistCondivise.html">Playlist condivise</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="creaPlaylist.html">Crea playlist</a>
+            </li>
         </div>
-    </nav>
+      </div>
+  </nav>
      
     <!--Playlist su cui stiamo lavorando-->
-    <div class="container mt-3">
+    <div class="container-fluid titolo">
       <p class="text-center fs-1 fw-bold" id="nome">La tua playlist</p>
   </div>
   <div class="container mt-3">
@@ -44,7 +47,9 @@
                   <th>Cover</th>
                   <th>Canzone</th>
                   <th>Album</th>
-                  <th>Artista</th>
+                  <th>Cantante</th>
+                  <th>Durata in minuti</th>
+                  <th>Anno di pubblicazione</th>
                   <th></th>
               </tr>
           </thead>
@@ -75,8 +80,9 @@
                 <th>Cover</th>
                 <th>Canzone</th>
                 <th>Album</th>
-                <th>Artista</th>
-                <th>Id</th>
+                <th>Cantante</th>
+                <th>Durata in minuti</th>
+                <th>Anno di pubblicazione</th>
                 <th></th>
             </tr>
         </thead>
@@ -91,20 +97,37 @@
 <div class="container mt-3">
   <form>
       <div class="mb-3">
-          <label for="nomePlaylist" class="form-label"></label>
+        <label for="nomePlaylist" class="form-label">Nome Playlist</label>
           <input type="text" class="form-control" id="nomePlaylist">
       </div>
       <div class="input-group mb-3">
           <span for="descrizione" class="input-group-text">Descrizione Testuale</span>
           <textarea class="form-control" aria-label="With textarea" id="descrizione"></textarea>
       </div>
-      <div class="mb-3">
-          <label for="tag" class="form-label">Tags</label>
-          <input type="text" class="form-control" id="tag">
-      </div>
       
-      <button type="submit" class="btn btn-primary d-grid gap-2 col-6 mx-auto" onclick="salvaPlaylist(); location.href='miePlaylist.html' ">SALVA</button>
+      <button type="submit" class="btn btn-primary d-grid gap-2 col-6 mx-auto" onclick="salvaPlaylist(); location.href='miePlaylist.html' ">SALVA DESCRIZIONE</button>
   </form>
+</div>
+
+<!--form per modificare i tag-->
+<div class="container mt-3">
+  <p class="text-center fs-1 fw-bold">Aggiungi i tag</p>
+  <p class="text-center fs-5 fw-bold">(Premi invio o il bottone per aggiungere un tag)</p>
+</div>
+
+<div class="container mt-3">
+  <form class="row g-3" onsubmit="return eliminaTag()">
+      <div class="col-auto">
+        <label for="tag" class="visually-hidden">Tag</label>
+        <input type="text" class="form-control" id="tagInserire" placeholder="Inserisci i tuoi tag...">
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary mb-3" onclick="inserisciTag()">Inserisci</button>
+      </div>
+      <div id="tagResult">
+
+      </div>
+    </form>
 </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
@@ -125,28 +148,42 @@
       var nomePlaylist = url.searchParams.get("nomePlaylist")
       var utente = JSON.parse(getUtenteAttivo())
       var playlist = getPlaylist(utente.playlists, nomePlaylist)
-      console.log(playlist)
+      
+      /*var playlistsDaPassare = []
+      console.log(Object.keys(utente.playlists).length)
+        for(var i=0; i<Object.keys(utente.playlists).length; i++){
+          if(utente.playlists[i].nome != document.getElementById('nomePlaylist').value){
+            console.log(utente.playlists[i])
+            playlistsDaPassare.push(utente.playlists[i])
+          }
+        }*/
+
+        
       
       nome.innerHTML += ": "+ nomePlaylist+"<button class="+"'btn btn-danger btn-xs'"+" id="+ "cancellaPlaylist" +" onclick="+"'eliminaPlaylist(); location.href= \"miePlaylist.html\"'"+">CANCELLA</button>"
 
       function stampaPlaylist(){
                 for(var i =0; i < playlist.canzoni.length; i++){
                     var request = sGetTrack(playlist.canzoni[i])
+                    
                     request.then(json =>{
-                        stampa.innerHTML += "<tr><td><img src='" + json.album.images[2].url + "'></td><td>" + json.name + "</td><td>" + json.album.name + "</td><td>" + json.artists[0].name + "</td><td><button class="+"'btn btn-danger btn-xs'"+" onclick="+"elimina(\"" +  json.id + "\")"+">RIMUOVI</button></td></tr>"
+                        durata = Math.round((json.duration_ms/60000) * 100) / 100
+                        stampa.innerHTML += "<tr class="+"evid"+"><td><img src='" + json.album.images[2].url + "'></td><td>" + json.name + "</td><td>" + json.album.name + "</td><td>" + json.artists[0].name + "</td><td>" + durata + "</td><td>" + json.album.release_date + "</td><td><button class="+"'btn btn-danger btn-xs'"+" onclick="+"elimina(\""+ json.id +","+ json.duration_ms +"\")"+">RIMUOVI</button></td></tr>"
                     })
                 }
       }
 
-      function elimina(id){
-
+      function elimina(text){
+        var array = text.split(",")
+        id = array[0]
+        durata = Math.round((array[1]/60000)*100)/100
+        console.log(durata)
         var canzoni = playlist.canzoni
         const index = canzoni.indexOf(id);
-        console.log(canzoni)
-        console.log(id)
-        console.log(index)
+        
         if (index > -1) {
-        canzoni.splice(index, 1); // 2nd parameter means remove one item only
+          playlist.durata -= durata
+          canzoni.splice(index, 1); // 2nd parameter means remove one item only
           window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
           updateUser()
           location.reload()
@@ -167,7 +204,8 @@
                 if (query.length > 3) {
                     search(query).then(json=>{
                         json.tracks.items.forEach(track=>{
-                            tbody.innerHTML += "<tr onclick='aggiungi(\""+ track.id +"\")'><td><img src='" + track.album.images[2].url + "'></td><td>" + track.name + "</td><td>" + track.album.name + "</td><td>" + track.artists[0].name + "</td><td>" + track.id + "</td></tr>"
+                            durata = Math.round((track.duration_ms/60000) * 100) / 100
+                            tbody.innerHTML += "<tr class="+"evid"+"><td><img src='" + track.album.images[2].url + "'></td><td>" + track.name + "</td><td>" + track.album.name + "</td><td>" + track.artists[0].name + "</td><td>" + durata + "</td><td>" + track.album.release_date + "</td><td><button class="+"'btn btn-success btn-xs'"+" onclick="+"aggiungi(\""+ track.id +","+ track.duration_ms +"\")"+">AGGIUNGI</button></td></tr>"
 
                         }
                         )
@@ -177,23 +215,25 @@
             }
 
             //funzione che mi serve per aggiungere una canzone alla playlist
-            function aggiungi(id) {
+            function aggiungi(text) {
                 
-
+               var array = text.split(",")
+                id = array[0]
+                durata = Math.round((array[1]/60000)*100)/100
                 var richiesta = sGetTrack(id)
 
                 if(!findCanzone(this.playlist, id)){
                     console.log(findCanzone(this.playlist, id))
                     window.alert("canzone aggiunta")
-                    
+                    playlist.durata += durata
                     playlist.canzoni.push(id)
                     
                     window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
                     updateUser()
                     
                     richiesta.then(json=>{
-                        
-                        stampa.innerHTML += "<tr><td><img src='" + json.album.images[2].url + "'></td><td>" + json.name + "</td><td>" + json.album.name + "</td><td>" + json.artists[0].name + "</td><td><button class="+"'btn btn-danger btn-xs'"+" onclick="+"elimina(\"" +  json.id + "\")"+">CANCELLA</button></td></tr>"
+                      durata = Math.round((json.duration_ms/60000) * 100) / 100
+                        stampa.innerHTML += "<tr class="+"evid"+"><td><img src='" + json.album.images[2].url + "'></td><td>" + json.name + "</td><td>" + json.album.name + "</td><td>" + json.artists[0].name + "</td><td>" + durata + "</td><td>" + json.album.release_date + "</td><td><button class="+"'btn btn-danger btn-xs'"+" onclick="+"elimina(\"" +  json.id + "\")"+">RIMUOVI</button></td></tr>"
                     }
                 
                     )
@@ -211,20 +251,30 @@
       function completaForm(){
         document.getElementById("nomePlaylist").value  = playlist.nome
         document.getElementById("descrizione").value = playlist.descrizione
-        document.getElementById("tag").value = playlist.tags
+        
       }
 
       function salvaPlaylist(){
         event.preventDefault()
-        
-        playlist.nome = document.getElementById("nomePlaylist").value
-        playlist.descrizione = document.getElementById("descrizione").value
-        playlist.tags = document.getElementById("tag").value
+        var playlistsDaPassare = []
+        console.log(Object.keys(utente.playlists).length)
+        for(var i=0; i<Object.keys(utente.playlists).length; i++){
+          if(utente.playlists[i].nome != document.getElementById('nomePlaylist').value){
+            console.log(utente.playlists[i])
+            playlistsDaPassare.push(utente.playlists[i])
+          }
+        }
 
-      
         
-        window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
-        updateUser()
+        if(!findNome(playlistsDaPassare, document.getElementById('nomePlaylist').value)){
+          playlist.nome = document.getElementById("nomePlaylist").value
+          playlist.descrizione = document.getElementById("descrizione").value
+          window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+          updateUser()
+        } else {
+          window.alert("Impossibile creare la playlist, nome gia' usato")
+        }
+        
       }
 
       function eliminaPlaylist(){
@@ -239,6 +289,51 @@
           
         }
       }
+
+      function stampaTag(){
+        //id=tagResult
+        for(var i=0; i<playlist.tags.length; i++){
+          tagResult.innerHTML += "<button class="+"'btn btn-primary btn-sm tags'"+" onclick="+"eliminaTag(\""+ playlist.tags[i] +"\")"+" id=\""+ playlist.tags[i] +"\">"+ playlist.tags[i] +" X"+"</button>"
+        }
+        
+      }
+
+      function inserisciTag(){
+            
+            event.preventDefault()
+            var tag = document.getElementById('tagInserire').value.trim()
+            //tolgo gli spazi
+            tag = tag.replace(/\s/g, '');
+            //tutto maiuscolo
+            tag = tag.toUpperCase();
+            document.getElementById('tagInserire').value = "";
+            if(!findTag(playlist.tags, tag)){
+                playlist.tags.push(tag)
+                window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+                tagResult.innerHTML += "<button class="+"'btn btn-primary btn-sm tags'"+" onclick="+"eliminaTag(\""+ tag +"\")"+" id=\""+ tag +"\">"+ tag +" X"+"</button>"
+                updateUser();
+            } else {
+                window.alert('non ripetere i tag')
+            }
+        }
+
+      function eliminaTag(tag){
+        
+            
+        playlist.tags.splice(playlist.tags.indexOf(tag), 1);
+        
+        window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+        updateUser();
+          
+         
+
+        var divParent = document.getElementById('tagResult')
+        var tagEliminare = document.getElementById(tag)
+        divParent.removeChild(tagEliminare)
+
+        return false;
+      }
+
     </script>
   </body>
 </html>

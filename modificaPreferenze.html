@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <title>Modifica Preferenze</title>
+  </head>
+  <body onload="stampaArtisti(); stampaGeneri()">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">GCMO</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="miePlaylist.html">Mie playlist</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="areaPersonale.html">Area Personale</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="playlistCondivise.html">Playlist condivise</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="creaPlaylist.html">Crea playlist</a>
+            </li>
+        </div>
+      </div>
+  </nav>
+    <div class="container-fluid titolo">
+        <p class="text-center fs-1 fw-bold">Modifica le tue preferenze musicali</p>
+      </div>
+
+    <div class="container mt-3">
+        <p class="text-center fs-2 fw-bold">Le tue preferenze musicali:</p>
+      </div>
+      
+    <div class="container mt-3">
+      <p class="text-center fs-3 fw-bold">Artisti preferiti</p>
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>Immagine</th>
+                  <th>Artista</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody id="risultati1"></tbody>
+      </table>
+  </div>
+  
+  
+  <div class="container mt-3">
+    <p class="text-center fs-3 fw-bold">Generi preferiti</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Genere</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="generi1"></tbody>
+    </table>
+</div>
+
+<div class="container mt-3">
+    <p class="text-center fs-2 fw-bold">Aggiungi preferenze musicali:</p>
+  </div>
+  
+      <div class="container mt-3">
+        <div class="mb-3">
+                <label for="cercaCanzone" class="form-label">Cerca artisti:</label>
+                <input type="text" class="form-control" id="cerca" onkeyup="searchBar()">
+            </div>
+    </div>
+    <div class="container mt-3">
+      <table class="table">
+          <thead>
+              <tr>
+                  <th>Immagine</th>
+                  <th>Artista</th>
+                  <th></th>
+              </tr>
+          </thead>
+          <tbody id="risultati"></tbody>
+      </table>
+  </div>
+  
+  <div class="container mt-3">
+    <div class="mb-3">
+            <label for="cercaCanzone" class="form-label">Cerca generi:</label>
+            <input type="text" class="form-control" id="cercaGenere" onkeyup="searchGenere()">
+        </div>
+  </div>
+  <div class="container mt-3">
+      <div class="list-group" id="generi">
+    
+    </div>
+  </div>
+  
+  <div class="container mt-3">
+      <div class="d-grid gap-2 col-6 mx-auto">
+    <button class="btn btn-primary" type="button" onclick="conferma()">CONFERMA</button>
+    
+  </div>
+  </div>
+
+  <div class="container mt-3">
+    <button type="submit" class="btn btn-secondary " onclick="location.href='areaPersonale.html'">ANNULLA</button>
+  </div>
+  
+      
+    <script src="js.js"></script>
+
+    <script>
+        var utente = JSON.parse(getUtenteAttivo())
+        function search(query) {
+                return sSearchArtists(query)
+            }
+
+        function searchBar() {
+                var tbody = document.getElementById('risultati')
+                tbody.innerHTML = ""
+                var query = document.getElementById('cerca').value
+                if (query.length > 3) {
+                    search(query).then(json=>{
+                        console.log(json)
+                        json.artists.items.forEach(artist=>{
+                            tbody.innerHTML += "<tr class="+"evid"+"><td><img src='" + artist.images[2].url + "'></td><td>" + artist.name + "</td><td><button class="+"'btn btn-success btn-xs destra'"+" onclick="+"aggiungiArtista(\""+ artist.id +"\")"+">AGGIUNGI</button></td></tr>"
+
+                        }
+                        )
+                    }
+                    )
+                }
+            }
+        
+        function searchGenere(){
+          richiesta = sGetGeneres()
+          var list = document.getElementById('generi')
+          list.innerHTML = ""
+          var genere = document.getElementById('cercaGenere').value
+          if(genere.length > 2){
+            richiesta.then(json=>{
+              //console.log(json)
+              json.genres.forEach(generes=>{
+                //console.log(generes)
+                if(generes.includes(genere)){
+              list.innerHTML += "<button type="+"button"+" class="+"'list-group-item list-group-item-action destra'"+" onclick="+"aggiungiGenere(\""+ generes +"\")"+">"+ generes +"</button>"
+            }
+          }
+            
+            
+          )
+          }
+            )  
+        }
+            
+          
+        }
+        function aggiungiArtista(id){
+          //utente = JSON.parse(getUtenteAttivo())
+          console.log(findArtista(utente.artisti, id))
+          if(findArtista(utente.artisti, id)==false){
+            console.log('entro')
+            utente.artisti.push(id)
+            window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+            updateUser()
+            location.reload()
+          } else {
+            window.alert("Artista gia' inserito")
+          }
+
+        }
+
+        function aggiungiGenere(genere){
+          //utente = JSON.parse(getUtenteAttivo())
+          console.log(utente)
+          console.log(findGenere(utente.generi, genere))
+          if(findGenere(utente.generi, genere) == false){
+            utente.generi.push(genere)
+            console.log(utente.generi)
+            window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+            updateUser()
+            location.reload()
+          }else {
+          window.alert("genere gia' inserito")
+        }
+        }
+        
+        function stampaArtisti(){
+        event.preventDefault()
+        var tbody = document.getElementById('risultati1')
+        console.log(Object.keys(utente.artisti).length)
+        for(var i =0; i <Object.keys(utente.artisti).length; i++){
+          richiesta = sGetArtists(utente.artisti[i])
+          richiesta.then(artist =>{
+            tbody.innerHTML += "<tr class="+"evid"+"><td><img src='" + artist.images[2].url + "'></td><td>" + artist.name + "</td><td><button class="+"'btn btn-danger btn-xs destra'"+" onclick='"+"eliminaArtista(\"" +  artist.id + "\")"+"'>ELIMINA</button></td></tr>"
+          }
+            
+          )
+          
+        }
+        
+      }
+
+      function stampaGeneri(){
+        event.preventDefault()
+        var list = document.getElementById('generi1')
+        console.log('vengo chiamata')
+        for(var i =0; i <Object.keys(utente.generi).length; i++){
+          //console.log(utente.generi[i])
+          list.innerHTML += "<tr class="+"evid"+"><td>"+ utente.generi[i] +"</td><td><button class="+"'btn btn-danger btn-xs destra'"+" onclick='"+"eliminaGenere(\"" +  utente.generi[i] + "\")"+"'>ELIMINA</button></td> "
+        }
+        
+      }
+
+      function eliminaGenere(genere){
+        indice = utente.generi.indexOf(genere)
+        console.log(indice)
+
+        if(indice > -1){
+            utente.generi.splice(indice, 1)
+            window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+            updateUser()
+            location.reload()
+        }
+
+      }
+
+      function eliminaArtista(id){
+        index = utente.artisti.indexOf(id)
+        console.log(index)
+        if(index > -1){
+            utente.artisti.splice(index, 1)
+            window.localStorage.setItem('utenteAttivo', JSON.stringify(utente))
+            updateUser()
+            location.reload()
+        }
+      }
+        
+    </script>
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+    -->
+  </body>
+</html>

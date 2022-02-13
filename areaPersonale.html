@@ -7,10 +7,10 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-
+    <link rel="stylesheet" href="style.css">
     <title>Area Personale</title>
   </head>
-  <body onload="datiPersonali()">
+  <body onload="datiPersonali(); stampaGeneri(); stampaArtisti()">
 
     <!--navbar-->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -30,13 +30,16 @@
             <li class="nav-item">
               <a class="nav-link active" href="playlistCondivise.html">Playlist condivise</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="creaPlaylist.html">Crea playlist</a>
+            </li>
         </div>
       </div>
   </nav>
 
   <!--table con dati-->
-    <div class="container mt-3">
-      <p class="text-center fs-1 fw-bold">Profilo</p>
+    <div class="container-fluid titolo">
+      <p class="text-center fs-1 fw-bold" id="profilo">Profilo</p>
     </div>
 
     <div class="container mt-3">
@@ -44,23 +47,15 @@
         <tbody>
           <tr>
             <th>Nome utente</th>
-            <th id="nomeUtente"></th>
+            <th id="nomeUtente" class="datiPersonali"></th>
           </tr>
           <tr>
             <th>Mail</th>
-            <th id="mail"></th>
+            <th id="mail" class="datiPersonali"></th>
           </tr>
           <tr>
             <th>Password</th>
-            <th id="password"></th>
-          </tr>
-          <tr>
-            <th>Genere preferito</th>
-            <th id="genere"></th>
-          </tr>
-          <tr>
-            <th>Cantante preferito</th>
-            <th id="cantante"></th>
+            <th id="password" class="datiPersonali"></th>
           </tr>
         </tbody>
       </table>
@@ -69,7 +64,38 @@
     <!--bottone per modificare profilo-->
     <div class="mb-3">
           <button type="submit" class="btn btn-primary d-grid gap-2 col-6 mx-auto" onclick= "location.href = 'modificaProfilo.html'">MODIFICA PROFILO</button>
-      </div>
+    </div>
+
+    <div class="container mt-3">
+      <p class="text-center fs-1 fw-bold">Preferenze musicali</p>
+    </div>
+    
+  <div class="container mt-3">
+    <p class="text-center fs-3 fw-bold">Artisti preferiti</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Immagine</th>
+                <th>Artista</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody id="risultati"></tbody>
+    </table>
+</div>
+
+
+<div class="container mt-3" id="generi">
+  <p class="text-center fs-3 fw-bold">Generi musicali preferiti</p>
+  <ul class="list-group">
+    
+  </ul>
+</div>
+    <!--bottone per modificare preferenze-->
+    <div class="mb-3">
+      <button type="submit" class="btn btn-primary d-grid gap-2 col-6 mx-auto" onclick= "location.href = 'modificaPreferenze.html'">MODIFICA PREFERENZE</button>
+    </div>
+    
     
     <!--logout-->
     <div class="container mt-3">
@@ -92,13 +118,52 @@
     <script src="js.js"></script>
     <script>
       utente = JSON.parse(getUtenteAttivo())
+      users = JSON.parse(window.localStorage.getItem('users'))
+    
+      profilo = document.getElementById('profilo')
+      profilo.innerHTML += " di: "+ utente.nome +" "+"<button class="+"'btn btn-danger btn-xs'"+" id="+ "cancellaProfilo" +" onclick="+"'eliminaProfilo(); location.href= \"index.html\"'"+">CANCELLA</button>"
 
       function datiPersonali(){
         nomeUtente.innerHTML += ""+ utente.nome +""
         mail.innerHTML += ""+ utente.email +""
         password.innerHTML += ""+ utente.password +""
-        genere.innerHTML += ""+ utente.genere +""
-        cantante.innerHTML += ""+ utente.artista +""
+      }
+
+      function eliminaProfilo(){
+        index = getIndiceUtenteAttivo(users, utente.email)
+        users.splice(index, 1)
+        window.localStorage.setItem('users', JSON.stringify(users))
+        user = ''
+        window.localStorage.setItem('utenteAttivo', JSON.stringify(user)) 
+        window.alert('Utente Eliminato')
+
+      }
+
+      function stampaArtisti(){
+        event.preventDefault()
+        var tbody = document.getElementById('risultati')
+        console.log(Object.keys(utente.artisti).length)
+        for(var i =0; i <Object.keys(utente.artisti).length; i++){
+          richiesta = sGetArtists(utente.artisti[i])
+          richiesta.then(artist =>{
+            tbody.innerHTML += "<tr class="+"evid"+"><td><img src='" + artist.images[2].url + "'></td><td>" + artist.name + "</td></td></tr>"
+          }
+            
+          )
+          
+        }
+        
+      }
+
+      function stampaGeneri(){
+        event.preventDefault()
+        var list = document.getElementById('generi')
+        console.log('vengo chiamata')
+        for(var i =0; i <Object.keys(utente.generi).length; i++){
+          //console.log(utente.generi[i])
+          list.innerHTML += "<li class='"+"list-group-item"+"'>"+ utente.generi[i] +"</li>"
+        }
+        
       }
     </script>
   </body>
