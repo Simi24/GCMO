@@ -1,6 +1,6 @@
 function getAPI_token(){
-    const client_id = "0fa2e58146a94e1ea6d372c510b88081"
-    const client_secret = "7e2723d53e88421b9c80c384b38c7170"
+    const client_id = "insert your client_id"
+    const client_secret = "insert your client_secret"
     var url = "https://accounts.spotify.com/api/token"
 
     var access_token = window.localStorage.getItem('access_token')
